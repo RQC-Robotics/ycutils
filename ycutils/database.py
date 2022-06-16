@@ -29,11 +29,11 @@ class Connector:
             aws_secret_access_key: Optional[str] = None,
     ):
         self._db: pymongo.database.Database = utils.make_db(
-            username, password, database, host, port, replicaSet, tlsCAFile
+            username, password, database, host, port, replicaSet, True, tlsCAFile
         )
         self._s3: boto3.client = utils.make_s3(aws_access_key_id, aws_secret_access_key)
 
-    def init_experiment(self,
+    def push_experiment(self,
                         name: str,
                         config: Document,
                         experiment: Document,

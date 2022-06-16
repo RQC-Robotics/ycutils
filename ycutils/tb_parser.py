@@ -40,7 +40,7 @@ class TBParser:
             path: str,
             suffix_keys: Optional[Iterable] = None,
     ) -> None:
-        dict_log = self.to_dict(suffix_keys=suffix_keys)
+        dict_log = self.to_dict(suffix_keys=suffix_keys, strip_scalars=True)
         row_numbers = set(map(len, dict_log.values()))
         assert len(row_numbers) == 1, "Number of rows differ per column."
 
