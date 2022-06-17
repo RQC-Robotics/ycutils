@@ -79,10 +79,10 @@ def parse_requirements(requirements_path):
     return open(requirements_path).read().split()
 
 
-def gather_paths(cursor: pymongo.cursor.Cursor, key: str = "s3") -> str:
+def gather_paths(cursor: pymongo.cursor.Cursor) -> str:
     """Concatenate S3 paths of log_dirs in cursor's documents
     so that can be displayed via tensorboard --logdir_spec.
     """
-    return ','.join((document[key] for document in cursor))
+    return ','.join((document['s3'] for document in cursor))
 
 
