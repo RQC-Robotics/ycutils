@@ -1,7 +1,8 @@
 """Helper functions."""
-from typing import Union, Iterable, Optional, Dict, Any
+from typing import Union, Iterable, Optional, Dict, Any, List
 
 import os
+import csv
 from bson.son import SON
 import pathlib
 from urllib.parse import quote_plus
@@ -66,12 +67,23 @@ def scan_git(parent_dir: Path = '.') -> Dict[str, Any]:
     return {'remotes': list(remotes), 'commit': commit}
 
 
-def bsonify_yaml(file_path: Path):
-    """Parse YAML file to valid document format."""
+def bsonify_yaml(file_path: Path) -> SON:
+    """Parse YAML file to valid document format.
+    Can be used to parse config files written im YAML."""
     yaml = YAML()
     with open(file_path, 'r', encoding='utf-8') as file:
         mapping = yaml.load(file)
     return SON(mapping)
+
+
+def bsonify_csv(file_path: Path) -> List[SON[str, Any]]:
+    """Load csv file to memory in valid document format."""
+    rows = []
+    with open(file_path) as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            rows.append(SON(row))
+        return rows
 
 
 def parse_requirements(requirements_path):

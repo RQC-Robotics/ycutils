@@ -12,7 +12,10 @@ Document = Union[collections.MutableMapping, Dict, bson.raw_bson.RawBSONDocument
 
 class Connector:
     """Once we decide what integrations we would like to use
-    it will be possible to implement
+    it will be possible to implement.
+
+    Now credentials should be specified explicitly while boto3 allows to load them
+    from AWS config directly.
     """
     _required_keys: Optional[Iterable] = ("git", "config", "s3")
 
