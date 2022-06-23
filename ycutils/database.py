@@ -1,8 +1,9 @@
 """Creates database object."""
-from typing import Union, Iterable, Optional
+from typing import Union, Iterable, Optional, Tuple
 
 import boto3
 import pymongo.database
+from bson.objectid import ObjectId
 from . import utils, entities
 
 
@@ -43,7 +44,7 @@ class Connector:
             git_parent_dir: utils.Path = '.',
             requirements_file: Optional[utils.Path] = None,
             s3: Optional[str] = None,
-    ):
+    ) -> Tuple[Union[ObjectId, Tuple[ObjectId]]]:
         """Push experiment to the database."""
         #todo: add artifacts support
         _runs_collection = self.database.runs

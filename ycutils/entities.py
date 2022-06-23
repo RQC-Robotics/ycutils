@@ -26,10 +26,10 @@ class ScalarMetric(TypedDict):
     values: List[float]
 
 
-# Those fields are present in the sacred.
-# Ideally they should be filled programmaticly,
-#   but for now they are hardcoded.
-_RUNS_PLACEHOLDER=dict(
+# These fields are present in sacred logs.
+# Ideally they should be filled programmatically,
+#   but for now some fields are hardcoded.
+_RUNS_PLACEHOLDER = dict(
     format="PseudoSacred-0.0.1",
     status="COMPLETED",
     result=None,
@@ -60,6 +60,7 @@ def make_log_entries(
         requirements_file: Optional[utils.Path] = None,
 ) -> Tuple[Document, Document, Document]:
     """Mimic MongoObserver in creating 3 documents.
+    Therefore format is named PseudoSacred.
 
     Documents:
         db.runs <- general_info.
@@ -74,7 +75,7 @@ def make_log_entries(
     metrics_entries = []
     metrics_links = []
     for name, data in metrics.items():
-        metric = ScalarMetric(_id = metrics_id,
+        metric = ScalarMetric(_id=metrics_id,
                               run_id=_id,
                               name=name,
                               steps=data['steps'],

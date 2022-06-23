@@ -2,13 +2,15 @@ from typing import Optional, Dict, List, Iterable, Literal, Union
 
 import csv
 import json
+import datetime
 import tensorboard.backend.event_processing.event_accumulator as tbea
 
 
 class TBParser:
     """Parse tensorboard Events File. Currently handles only ScalarEvents."""
-    def __init__(self, path: str, size_guidance: int = 1000):
-        """See tensorboard docs for size guidance explanation."""
+    def __init__(self, path: str, size_guidance: int = 10000):
+        """See tensorboard docs for size guidance explanation.
+        Set size_guidance=0 to load all the data at once."""
         acc = tbea.EventAccumulator(path, size_guidance={tbea.SCALARS: size_guidance})
         self._acc = acc.Reload()
 
@@ -21,9 +23,9 @@ class TBParser:
 
         suffix_keys - select specific scalar by its suffix.
         mode - returned values can be:
-            None for tbea.ScalarEvents(value, wall_time, step),
-            strip for plain value,
-            unpack for Dict[value, wall_time, step]
+            None: tbea.ScalarEvents(value, wall_time, step),
+            strip: plain value,
+            unpack: Dict[value, wall_time, step]
         """
         if isinstance(suffix_keys, str):
             suffix_keys = (suffix_keys, )
@@ -41,6 +43,10 @@ class TBParser:
             elif mode == 'unpack':
                 scalars = zip(*map(lambda sc: (sc.wall_time, sc.value, sc.step), scalars))
                 scalars = {k: v for k, v in zip(('timestamps', 'values', 'steps'), scalars)}
+                scalars['timestamps'] = list(map(
+                    datetime.datetime.fromtimestamp,
+                    scalars['timestamps'])
+                )
             return scalars
 
         return {key: _process_scalars(key) for key in self._acc.scalars.Keys() if _predicate(key)}
@@ -51,7 +57,7 @@ class TBParser:
             suffix_keys: Optional[Iterable] = None,
     ) -> None:
         """Parse and save as CSV."""
-        # make compatible with "unpack" mode.
+        # TODO: make compatible with "unpack" mode.
         dict_log = self.to_dict(suffix_keys=suffix_keys, mode="strip")
         row_numbers = set(map(len, dict_log.values()))
         assert len(row_numbers) == 1, "Number of rows differ per column."
