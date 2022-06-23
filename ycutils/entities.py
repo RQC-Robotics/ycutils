@@ -1,4 +1,4 @@
-"""Python objects describing entries that should present in database."""
+"""Python objects describing entries that should be present in database."""
 from typing import TypedDict, Optional, List, TypeVar, Tuple
 
 import datetime

@@ -1,1 +1,1 @@
-"""Module with examples of use boto3, pymongo and tensorboard."""
+"""Module with the examples of use boto3, pymongo and tensorboard."""
