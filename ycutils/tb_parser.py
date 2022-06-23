@@ -3,6 +3,7 @@ from typing import Optional, Dict, List, Iterable, Literal, Union
 import csv
 import json
 import datetime
+from bson import json_util
 import tensorboard.backend.event_processing.event_accumulator as tbea
 
 
@@ -33,20 +34,19 @@ class TBParser:
         def _predicate(key):
             if suffix_keys:
                 return any(map(key.endswith, suffix_keys))
-            else:
-                return True
+            return True
 
         def _process_scalars(key):
             scalars = self._acc.Scalars(key)
-            if mode == 'strip':
+            if mode == "strip":
                 scalars = list(map(lambda sc: sc.value, scalars))
-            elif mode == 'unpack':
-                scalars = zip(*map(lambda sc: (sc.wall_time, sc.value, sc.step), scalars))
-                scalars = {k: v for k, v in zip(('timestamps', 'values', 'steps'), scalars)}
-                scalars['timestamps'] = list(map(
-                    datetime.datetime.fromtimestamp,
-                    scalars['timestamps'])
-                )
+            elif mode == "unpack":
+                scalars = zip(*map(
+                    lambda sc: (datetime.datetime.fromtimestamp(sc.wall_time),
+                                sc.value,
+                                sc.step),
+                    scalars))
+                scalars = dict(zip(("timestamps", "values", "steps"), scalars))
             return scalars
 
         return {key: _process_scalars(key) for key in self._acc.scalars.Keys() if _predicate(key)}
@@ -62,12 +62,12 @@ class TBParser:
         row_numbers = set(map(len, dict_log.values()))
         assert len(row_numbers) == 1, "Number of rows differ per column."
 
-        with open(file_path, 'w') as log_file:
+        with open(file_path, "w", encoding="utf-8") as log_file:
             writer = csv.DictWriter(log_file, fieldnames=dict_log.keys())
             writer.writeheader()
 
             keys = dict_log.keys()
-            rows = map(lambda values: {k: v for k, v in zip(keys, values)}, zip(*dict_log.values()))
+            rows = map(lambda values: dict(zip(keys, values)), zip(*dict_log.values()))
             writer.writerows(rows)
 
     def to_npz(self, file_path) -> None:
@@ -82,8 +82,8 @@ class TBParser:
     ) -> None:
         """Parse and save as JSON."""
         dict_log = self.to_dict(suffix_keys=suffix_keys, mode=mode)
-        with open(file_path, 'w') as file:
-            json.dump(dict_log, file)
+        with open(file_path, "w", encoding="utf-8") as file:
+            json.dump(dict_log, file, default=json_util.default)
 
     @classmethod
     def detect_logs(cls, directory: str) -> List[str]:

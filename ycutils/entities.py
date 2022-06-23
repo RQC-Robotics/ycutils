@@ -8,16 +8,19 @@ from bson.objectid import ObjectId
 
 from . import utils
 
-Document = TypeVar('Document', collections.MutableMapping, bson.raw_bson.RawBSONDocument)
+Document = TypeVar("Document", collections.MutableMapping, bson.raw_bson.RawBSONDocument)
 
 
 class Experiment(TypedDict):
+    """Supplementary details related to experiment."""
     name: str
     repositories: List[Document]
     dependencies: List[str]
 
 
 class ScalarMetric(TypedDict):
+    """Tensorboard's ScalarEvent analogue.
+    db.metrics document."""
     _id: int
     run_id: int
     name: str
@@ -41,6 +44,8 @@ _RUNS_PLACEHOLDER = dict(
 
 
 class RunEntry(TypedDict):
+    """Runs document body (db.runs).
+    Fields are inherited from Sacred."""
     _id: int
     config: Document
     experiment: Experiment
@@ -56,7 +61,7 @@ def make_log_entries(
         name: str,
         config: Document,
         metrics: Document,
-        git_parent_dir: str = '.',
+        git_parent_dir: str = ".",
         requirements_file: Optional[utils.Path] = None,
 ) -> Tuple[Document, Document, Document]:
     """Mimic MongoObserver in creating 3 documents.
@@ -74,20 +79,22 @@ def make_log_entries(
     metrics_id = ObjectId()
     metrics_entries = []
     metrics_links = []
-    for name, data in metrics.items():
-        metric = ScalarMetric(_id=metrics_id,
-                              run_id=_id,
-                              name=name,
-                              steps=data['steps'],
-                              timestamps=data['timestamps'],
-                              values=data['values'])
-        metrics_entries.append(metric)
-        metrics_links.append({'name': name, 'id': metrics_id})
+    for metric, data in metrics.items():
+        metric_entry = ScalarMetric(
+            _id=metrics_id,
+            run_id=_id,
+            name=metric,
+            steps=data["steps"],
+            timestamps=data["timestamps"],
+            values=data["values"]
+        )
+        metrics_entries.append(metric_entry)
+        metrics_links.append({"name": metric, "id": metrics_id})
 
     runs_entry = RunEntry(_id=_id,
                           config=config,
                           experiment=experiment,
-                          info={'metrics': metrics_links}
+                          info={"metrics": metrics_links}
                           )
     runs_entry.update(_RUNS_PLACEHOLDER)
 

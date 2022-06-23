@@ -25,6 +25,8 @@ class Connector:
             aws_access_key_id: Optional[str] = None,
             aws_secret_access_key: Optional[str] = None,
     ):
+        """Arguments are named and defined in correspondence
+         with their pymongo/boto3 counterparts."""
         self._db: pymongo.database.Database = utils.make_mongo_client(
             username=username,
             password=password,
@@ -41,9 +43,9 @@ class Connector:
             name: str,
             config: entities.Document,
             metrics: entities.Document,
-            git_parent_dir: utils.Path = '.',
+            git_parent_dir: utils.Path = ".",
             requirements_file: Optional[utils.Path] = None,
-            s3: Optional[str] = None,
+            s3_path: Optional[str] = None,
     ) -> Tuple[Union[ObjectId, Tuple[ObjectId]]]:
         """Push experiment to the database."""
         #todo: add artifacts support
@@ -59,8 +61,8 @@ class Connector:
             git_parent_dir=git_parent_dir,
             requirements_file=requirements_file
         )
-        if s3:
-            runs_entry.update(s3=s3)
+        if s3_path:
+            runs_entry.update(s3=s3_path)
         id_runs = _runs_collection.insert_one(runs_entry)
         ids_metrics = _metrics_collection.insert_many(metrics_entries)
         return id_runs, ids_metrics

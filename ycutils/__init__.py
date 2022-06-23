@@ -1,1 +1,1 @@
-#TODO: think about possble integration with dvc
+"""Module with examples of use boto3, pymongo and tensorboard."""
