@@ -114,3 +114,28 @@ def gather_paths(cursor: pymongo.cursor.Cursor) -> str:
     so that can be displayed via tensorboard --logdir_spec.
     """
     return ",".join((document["s3"] for document in cursor))
+
+
+def put_dir(s3: boto3.client,
+            bucket: str,
+            directory: Path,
+            prefix: str = ""
+            ):
+    """Uploads whole dir to S3 using botocore.client.S3.
+    Intentionally avoids dotfiles. Current implementation strips
+    directory itself in path name which can be changed in the future.
+
+    Args:
+        s3 - configured client.S3 instance.
+        bucket - S3 bucket name.
+        directory - path to dir that will be upload.
+        prefix - prefix that will be added to files.
+    """
+    for path in pathlib.Path(directory).rglob('*'):
+        obj_path = str(prefix / path.relative_to(directory))
+        if path.is_dir():
+            put_dir(s3, bucket, path, obj_path)
+        else:
+            if str(path.name).startswith('.'):
+                pass
+            s3.upload_file(str(path), bucket, obj_path)
