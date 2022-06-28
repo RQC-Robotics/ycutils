@@ -51,7 +51,7 @@ class Connector:
         #todo: add artifacts support
         _runs_collection = self.database.runs
         _metrics_collection = self.database.metrics
-        last = _runs_collection.find_one(sort=[("_id", 1)])
+        last = _runs_collection.find_one(sort=[("_id", -1)])
         _id = last["_id"] + 1 if last else 1
         runs_entry, metrics_entries, _ = entities.make_log_entries(
             _id=_id,
