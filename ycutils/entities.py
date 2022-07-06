@@ -37,8 +37,8 @@ _RUNS_PLACEHOLDER = dict(
     status="COMPLETED",
     result=None,
     resources=[],
-    artifacts=[],  # The only useful field.
-    captured_out=None,
+    artifacts=[],  # useful field.
+    captured_out="",
     host=[]
 )
 
@@ -81,7 +81,7 @@ def make_log_entries(
     metrics_links = []
     for metric, data in metrics.items():
         metric_entry = ScalarMetric(
-            _id=metrics_id,
+            _id=str(metrics_id),
             run_id=_id,
             name=metric,
             steps=data["steps"],
