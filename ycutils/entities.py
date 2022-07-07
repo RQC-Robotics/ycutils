@@ -76,12 +76,12 @@ def make_log_entries(
     dependencies = utils.parse_requirements(requirements_file)
     experiment = Experiment(name=name, repositories=git_info, dependencies=dependencies)
 
-    metrics_id = ObjectId()
     metrics_entries = []
     metrics_links = []
     for metric, data in metrics.items():
+        metric_id = ObjectId()
         metric_entry = ScalarMetric(
-            _id=str(metrics_id),
+            _id=metric_id,
             run_id=_id,
             name=metric,
             steps=data["steps"],
@@ -89,7 +89,7 @@ def make_log_entries(
             values=data["values"]
         )
         metrics_entries.append(metric_entry)
-        metrics_links.append({"name": metric, "id": metrics_id})
+        metrics_links.append({"name": metric, "id": str(metric_id)})
 
     runs_entry = RunEntry(_id=_id,
                           config=config,
