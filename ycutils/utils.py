@@ -35,10 +35,12 @@ def make_mongo_client(
     username, password = map(quote_plus, (username, password))
     url = f"mongodb://{username}:{password}@" \
           f"{host}/?replicaSet={replicaSet}&authSource={authSource}"
+
     if tls:
         url += f"&tls=true&tlsCAFile={tlsCAFile}"
     else:
         tlsCAFile = None
+
     return pymongo.MongoClient(
         host,
         username=username,
@@ -96,12 +98,9 @@ def bsonify_yaml(file_path: Path) -> SON:
 
 def bsonify_csv(file_path: Path) -> List[SON[str, Any]]:
     """Load csv file in the valid document format."""
-    rows = []
     with open(file_path, encoding="utf-8") as file:
         reader = csv.DictReader(file)
-        for row in reader:
-            rows.append(SON(row))
-        return rows
+        return [SON(row) for row in reader]
 
 
 def parse_requirements(requirements_path: Path):
@@ -121,15 +120,15 @@ def put_dir(s3: boto3.client,
             directory: Path,
             prefix: str = ""
             ):
-    """Uploads whole dir to S3 using botocore.client.S3.
-    Intentionally avoids dotfiles. Current implementation strips
+    """Uploads a whole dir to S3 using botocore.client.S3.
+    Intentionally avoids dotfiles. The current implementation strips
     directory itself in path name which can be changed in the future.
 
     Args:
         s3 - configured client.S3 instance.
         bucket - S3 bucket name.
-        directory - path to dir that will be upload.
-        prefix - prefix that will be added to files.
+        directory - path to a dir that will be upload.
+        prefix - will be added to the files.
     """
     for path in pathlib.Path(directory).rglob('*'):
         obj_path = str(prefix / path.relative_to(directory))

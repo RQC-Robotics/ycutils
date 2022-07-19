@@ -9,6 +9,7 @@ import tensorboard.backend.event_processing.event_accumulator as tbea
 
 class TBParser:
     """Parse tensorboard Events File. Currently handles only ScalarEvents."""
+    #TODO: add Iterate over data, stack values
     def __init__(self, path: str, size_guidance: int = 10000):
         """See tensorboard docs for size guidance explanation.
         Set size_guidance=0 to load all the data at once."""
